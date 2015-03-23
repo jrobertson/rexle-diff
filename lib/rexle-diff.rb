@@ -72,7 +72,7 @@ class RexleDiff
       offset = array_index(a, i)
       offset2 = array_index(a2, i2)
       a2[offset2][1].merge!(a[offset][1])
-      compare(c[i],c2[i]) if c[i].length > 3
+      compare(c[i],c2[i2]) if c[i].length > 3
     end
 
   end
