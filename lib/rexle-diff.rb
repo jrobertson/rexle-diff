@@ -27,10 +27,15 @@ class RexleDiff
 
   end
 
-  def added(list, list2)
+  def added(values, values2, names, names2)
 
-    result = list2 -  list
-    indexes = result.map {|x| list2.index x}
+    values_added_or_changed = values2 - values
+    names_added_or_changed = names - names2
+    added_or_changed = values_added_or_changed | names_added_or_changed
+
+    values_indexes = values_added_or_changed.map {|x| values2.index x}
+    names_indexes = names_added_or_changed.map {|x| names.index x}
+    values_indexes | names_indexes
 
   end
   
@@ -48,7 +53,7 @@ class RexleDiff
     c2 = raw_c2.select{|x| x.is_a? Array}
     names2, values2 = names_values(c2)
 
-    added_indexes = added(values, values2)
+    added_indexes = added(values, values2, names, names2)
 
     added_indexes.each do |i|
 
