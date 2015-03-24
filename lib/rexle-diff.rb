@@ -59,7 +59,9 @@ class RexleDiff
     added_indexes.each do |i|
 
       offset = array_index(a2, i)
-      a2[offset][1].merge!(created: Time.now, last_modified: Time.now)
+      next unless offset
+
+      a2[offset][1].merge!(created: Time.now.to_s, last_modified: Time.now.to_s)
     end
     
     # we need to know the deleted index
@@ -93,7 +95,7 @@ class RexleDiff
   def timestamp(doc)
 
     doc.root.traverse do |x|
-      x.attributes[:created] = Time.now unless x.attributes[:created]
+      x.attributes[:created] = Time.now.to_s unless x.attributes[:created]
     end
 
     return doc
