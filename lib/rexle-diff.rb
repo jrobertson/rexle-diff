@@ -24,13 +24,18 @@ class RexleDiff
   def hashedxml(node)
     
     node.elements.map do |element|
-      h = Digest::MD5.new << element.xml
+      
+      attributes = element.attributes.clone
+      attributes.delete :created
+      val = [element.name, attributes, element.text].to_s      
+      
+      h = Digest::MD5.new << val
       h.to_s
     end
   end
 
   def added(hxlist, hxlist2)
-   
+
     added_or_changed = hxlist2 - hxlist    
     indexes = added_or_changed.map {|x| hxlist2.index x}    
     indexes
@@ -41,11 +46,21 @@ class RexleDiff
     
     hxlist, hxlist2 = hashedxml(node), hashedxml(node2)   
     
+    # elements which may have been modified are also 
+    #                                         added to the added_indexes list
+    
     added_indexes = added(hxlist, hxlist2)
 
     added_indexes.each do |i|
-      node2.elements[i+1].attributes\
-                .merge!(created: Time.now.to_s, last_modified: Time.now.to_s)
+      
+      attributes = node2.elements[i+1].attributes
+      attributes[:created] ||= Time.now.to_s
+      
+      node2.elements[i+1].traverse do |e|
+        
+        e.attributes[:created] ||= Time.now.to_s
+
+      end
     end
     
     deleted_indexes = deleted(hxlist, hxlist2)
@@ -54,9 +69,8 @@ class RexleDiff
 
     unchanged_indexes.each do |i, i2|      
 
-      node2.elements[i2+1].attributes[:created] ||= Time.now.to_s        
-      compare(node.elements[i+1], node2.elements[i2+1]) if node.elements[i+1].has_elements?
-
+      compare(node.elements[i+1], node2.elements[i2+1]) if node\
+                                                   .elements[i+1].has_elements?
     end
 
   end
