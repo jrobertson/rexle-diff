@@ -34,7 +34,8 @@ class RexleDiff
       # when the element value itself hashn't changed.
       #
       %i(created last_modified).each {|x| attributes.delete x}
-      val = [element.name, attributes, element.text.to_s.strip].to_s
+      x = element.elements.length > 0 ? '' : 0
+      val = [element.name, attributes, element.text.to_s.strip, x].to_s
       
       h = Digest::MD5.new << val
       h.to_s
@@ -70,7 +71,7 @@ class RexleDiff
       attributes[:created] ||= Time.now.to_s
       
       node2.elements[i+1].traverse do |e|
-        
+
         e.attributes[:created] ||= Time.now.to_s
 
       end
@@ -79,7 +80,7 @@ class RexleDiff
     deleted_indexes = deleted(hxlist, hxlist2)
     
     unchanged_indexes = unchanged(hxlist, hxlist2)
-    
+
     unchanged_indexes.each do |i, i2|      
 
       compare(node.elements[i+1], node2.elements[i2+1]) if node\

@@ -3,7 +3,6 @@
 # file: rexle-diff.rb
 
 require 'rexle'
-require 'digest/md5'
 
 
 class RexleDiff
@@ -35,10 +34,8 @@ class RexleDiff
       #
       %i(created last_modified).each {|x| attributes.delete x}
       x = element.elements.length > 0 ? '' : 0
-      val = [element.name, attributes, element.text.to_s.strip, x].to_s
+      [element.name, attributes, element.text.to_s.strip, x].hash
       
-      h = Digest::MD5.new << val
-      h.to_s
     end
   end
 
