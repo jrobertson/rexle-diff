@@ -5,6 +5,7 @@
 require 'rexle'
 require 'fuzzy_match'
 
+
 class RexleDiff
 
   attr_reader :to_doc
