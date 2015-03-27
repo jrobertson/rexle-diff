@@ -63,11 +63,9 @@ class RexleDiff
     # elements which may have been modified are also 
     #                                         added to the added_indexes list    
     added_or_changed_indexes = added(hxlist, hxlist2)
-  
     added_indexes, updated_indexes  = @fuzzy_match ? \
                    fuzzy_match(added_or_changed_indexes, node, node2) : \
-                                                   added_or_changed_indexes, []
-    
+                                                   [added_or_changed_indexes, []]
     added_indexes.each do |i|
       
       attributes = node2.elements[i+1].attributes
