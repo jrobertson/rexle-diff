@@ -79,8 +79,12 @@ class RexleDiff
 
     
     updated_indexes.each do |i|
-      attributes = node2.elements[i+1].attributes
-      attributes[:last_modified] = Time.now.to_s      
+      
+      attributes2 = node2.elements[i+1].attributes
+      attributes2[:last_modified] = Time.now.to_s      
+      
+      attributes = node.elements[i+1].attributes
+      attributes2[:created] = attributes[:created] if attributes[:created]      
     end
     
     added_indexes.each do |i|
