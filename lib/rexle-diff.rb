@@ -6,21 +6,75 @@ require 'rexle'
 require 'fuzzy_match'
 
 
-class RexleDiff
+class Rexle::Element
 
+  def hashed()      @hash        end
+  def hashed=(num)  @hash = num  end  
+
+end
+
+
+class RexleDiff
+  
+  class HashedDoc
+
+    def initialize(node)
+
+      @node = node
+      @node.hashed = hash(node) + hashit(node).inject(:+)
+
+    end
+
+    def to_doc()
+      @node
+    end
+    
+    def hash(element)
+
+      attributes = element.attributes.clone    
+      %i(created last_modified).each {|x| attributes.delete x}
+      [element.name, attributes, element.text.to_s.strip].hash
+
+    end
+
+    def hashit(node)
+      
+      a = node.elements.map do |element|
+        
+        row = hash element
+
+        if element.has_elements?
+          r = hashit(element)
+          sum = row + r.inject(:+)
+          element.hashed = sum
+          sum
+        else
+          element.hashed = row
+          row
+        end  
+      end
+
+    end  
+
+  end
+
+
+  
   attr_reader :to_doc
 
   def initialize(source1, source2, fuzzy_match: false)    
 
     @fuzzy_match = fuzzy_match
-    doc1, doc2  = Rexle.new(source1), Rexle.new(source2)
+
+    doc1, doc2  = HashedDoc.new(Rexle.new(source1).root).to_doc, 
+        HashedDoc.new(Rexle.new(source2).root).to_doc
+
     compare(doc1.root, doc2.root)
 
     @to_doc = doc2
   end
   
   private
-
 
   
   # Returns an array of indexes of the nodes from the newer document which 
@@ -30,7 +84,7 @@ class RexleDiff
         
     list1 =  hxlist.map.with_index {|x,i| x + i}
     list2 =  hxlist2.map.with_index {|x,i| x + i}
-    
+        
     added_or_changed = list2 - list1
     indexes = added_or_changed.map {|x| list2.index x} 
     
@@ -48,6 +102,7 @@ class RexleDiff
     # elements which may have been modified are also 
     #                                         added to the added_indexes list    
     added_or_changed_indexes = added(hxlist, hxlist2)
+
     added_indexes, updated_indexes  = @fuzzy_match ? \
                    fuzzy_match(added_or_changed_indexes, node, node2) : \
                                                    [added_or_changed_indexes, []]
@@ -66,7 +121,7 @@ class RexleDiff
     deleted_indexes = deleted(hxlist, hxlist2)
     
     unchanged_indexes = unchanged(hxlist, hxlist2)
-
+    
     unchanged_indexes.each do |i, i2|      
 
       compare(node.elements[i+1], node2.elements[i2+1]) if node\
@@ -124,20 +179,8 @@ class RexleDiff
   #
   def hashedxml(node)
     
-    node.elements.map do |element|
-      
-      attributes = element.attributes.clone
-      
-      # Although attribute last_modified isn't used by rexle-diff it is 
-      # created by Dynarex whenever a record is created or updated. 
-      # This would of course cause the record to be flagged as changed even 
-      # when the element value itself hashn't changed.
-      #
-      %i(created last_modified).each {|x| attributes.delete x}
-      x = element.elements.length > 0 ? '' : 0
-      [element.name, attributes, element.text.to_s.strip, x].hash
-      
-    end
+    node.elements.map &:hashed
+            
   end  
   
   # Returns an array of indexes from both original and new nodes which 
