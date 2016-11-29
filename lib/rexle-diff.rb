@@ -21,34 +21,19 @@ class RexleDiff
   
   private
 
-  # Returns an array of MD5 hashed strings representing each child node itself
-  #
-  def hashedxml(node)
-    
-    node.elements.map do |element|
-      
-      attributes = element.attributes.clone
-      
-      # Although attribute last_modified isn't used by rexle-diff it is 
-      # created by Dynarex whenever a record is created or updated. 
-      # This would of course cause the record to be flagged as changed even 
-      # when the element value itself hashn't changed.
-      #
-      %i(created last_modified).each {|x| attributes.delete x}
-      x = element.elements.length > 0 ? '' : 0
-      [element.name, attributes, element.text.to_s.strip, x].hash
-      
-    end
-  end
 
   
   # Returns an array of indexes of the nodes from the newer document which 
   # have been added or changed
   #
   def added(hxlist, hxlist2)
-
-    added_or_changed = hxlist2 - hxlist    
-    indexes = added_or_changed.map {|x| hxlist2.index x}    
+        
+    list1 =  hxlist.map.with_index {|x,i| x + i}
+    list2 =  hxlist2.map.with_index {|x,i| x + i}
+    
+    added_or_changed = list2 - list1
+    indexes = added_or_changed.map {|x| list2.index x} 
+    
     indexes
 
   end  
@@ -133,6 +118,27 @@ class RexleDiff
 
     [added_indexes, updated_indexes]
   end
+  
+
+  # Returns an array of MD5 hashed strings representing each child node itself
+  #
+  def hashedxml(node)
+    
+    node.elements.map do |element|
+      
+      attributes = element.attributes.clone
+      
+      # Although attribute last_modified isn't used by rexle-diff it is 
+      # created by Dynarex whenever a record is created or updated. 
+      # This would of course cause the record to be flagged as changed even 
+      # when the element value itself hashn't changed.
+      #
+      %i(created last_modified).each {|x| attributes.delete x}
+      x = element.elements.length > 0 ? '' : 0
+      [element.name, attributes, element.text.to_s.strip, x].hash
+      
+    end
+  end  
   
   # Returns an array of indexes from both original and new nodes which 
   # identifies which nodes did not change.
