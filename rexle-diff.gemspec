@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'rexle-diff'
-  s.version = '0.6.0'
+  s.version = '0.6.1'
   s.summary = 'Compares XML and returns the latest XML with changes identified by datetime stamps in the attributes.'
   s.authors = ['James Robertson']
   s.files = Dir['lib/rexle-diff.rb']

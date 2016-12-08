@@ -58,9 +58,7 @@ class RexleDiff
 
   end
 
-
   
-  attr_reader :to_doc
 
   def initialize(source1, source2, fuzzy_match: false)    
 
@@ -71,7 +69,21 @@ class RexleDiff
 
     compare(doc1.root, doc2.root)
 
-    @to_doc = doc2
+    @doc = doc2
+  end
+    
+  def changed()
+    @doc.root.xpath('*[@last_modified]')
+  end
+  
+  alias updated changed
+  
+  def created()
+    @doc.root.xpath('*[@created]')
+  end
+  
+  def to_doc()
+    @doc
   end
   
   private
