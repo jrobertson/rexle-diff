@@ -113,11 +113,16 @@ class RexleDiff
     
     # elements which may have been modified are also 
     #                                         added to the added_indexes list    
+    
     added_or_changed_indexes = added(hxlist, hxlist2)
 
     added_indexes, updated_indexes  = @fuzzy_match ? \
                    fuzzy_match(added_or_changed_indexes, node, node2) : \
                                                    [added_or_changed_indexes, []]
+    
+    # if there are updated indexes, search for differences with the original
+    # to-do
+    
     added_indexes.each do |i|
       
       attributes = node2.elements[i+1].attributes
@@ -132,9 +137,13 @@ class RexleDiff
 
     deleted_indexes = deleted(hxlist, hxlist2)
     
-    unchanged_indexes = unchanged(hxlist, hxlist2)
+    unchanged_indexes = unchanged(hxlist, hxlist2)    
+
+    updated_indexes.each do |i|
+      compare(node.elements[i+1], node2.elements[i+1])
+    end
     
-    unchanged_indexes.each do |i, i2|      
+    unchanged_indexes.each do |i, i2|                  
 
       compare(node.elements[i+1], node2.elements[i2+1]) if node\
                                                    .elements[i+1].has_elements?
